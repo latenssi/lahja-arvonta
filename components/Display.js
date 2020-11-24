@@ -5,12 +5,13 @@ export default function Display() {
   const [code, setCode] = useQueryValue("code", "");
   const [dataEncrypted, setDataEncrypted] = useQueryValue("data", "");
 
-  const { sample, title } = decode(decrypt(dataEncrypted)) ?? {
+  const { sample, title, seed } = decode(decrypt(dataEncrypted)) ?? {
     sample: [],
     title: "",
+    seed: "",
   };
 
-  const pIdx = sample.findIndex((name) => getCode(name) === code);
+  const pIdx = sample.findIndex((name) => getCode(name, seed) === code);
   const recipient = pIdx !== -1 ? sample[(pIdx + 1) % sample.length] : null;
 
   return (
@@ -20,20 +21,22 @@ export default function Display() {
         <p>
           <b>{recipient}</b> saa sinulta lahjan!
         </p>
-      ) : null}
-
-      <textarea
-        value={dataEncrypted}
-        placeholder="Syötä tapahtuma koodi"
-        onChange={(e) => setDataEncrypted(e.target.value)}
-      />
-      <br />
-      <input
-        type="text"
-        placeholder="Syötä oma koodisi"
-        value={code}
-        onChange={(e) => setCode(e.target.value)}
-      />
+      ) : (
+        <>
+          <textarea
+            value={dataEncrypted}
+            placeholder="Syötä tapahtuma koodi"
+            onChange={(e) => setDataEncrypted(e.target.value)}
+          />
+          <br />
+          <input
+            type="text"
+            placeholder="Syötä oma koodisi"
+            value={code}
+            onChange={(e) => setCode(e.target.value)}
+          />
+        </>
+      )}
     </>
   );
 }

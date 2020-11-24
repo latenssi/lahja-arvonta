@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Permutation } from "js-combinatorics/commonjs/combinatorics";
 
 import useQueryValue from "../lib/useQueryValue";
-import { encode, decode, encrypt, getCode } from "../lib/util";
+import { encode, decode, encrypt, getCode, exportAsJSON } from "../lib/util";
 
 export default function Generate() {
   const [title, setTitle] = useQueryValue("title", "");
@@ -12,15 +12,33 @@ export default function Generate() {
   const names = (decode(namesEncoded) || []).sort();
 
   function generate() {
-    const codes = [names?.map((name) => ({ name, code: getCode(name) }))];
+    const seed = Date.now();
+
+    const codes = names?.map((name) => ({ name, code: getCode(name, seed) }));
 
     const permutations = new Permutation(names);
     const sample = permutations.sample();
-
-    const data = { sample, title };
+    const data = { sample, title, seed };
     const dataEncrypted = encrypt(encode(data));
 
-    console.log(codes, dataEncrypted);
+    const baseURL = `${window.location.protocol}//${window.location.host}`;
+
+    const urls = codes.map(({ name, code }) => ({
+      name,
+      url: `${baseURL}/?code=${encodeURIComponent(
+        code
+      )}&data=${encodeURIComponent(dataEncrypted)}`,
+    }));
+
+    const onlyUrls = urls.map(({ url }) => url);
+
+    const editUrl = `${baseURL}/generate/?title=${encodeURIComponent(
+      title
+    )}&names=${namesEncoded}`;
+    exportAsJSON(
+      { codes, data: dataEncrypted, urls, onlyUrls, editUrl },
+      title
+    );
   }
 
   return (
@@ -35,7 +53,18 @@ export default function Generate() {
       {names?.length ? (
         <ul>
           {names?.map((name) => (
-            <li key={`names-list-item-${name}`}>{name}</li>
+            <li key={`names-list-item-${name}`}>
+              {name}
+              <button
+                style={{ marginLeft: "0.5rem" }}
+                onClick={() => {
+                  const _names = names.filter((_name) => _name !== name);
+                  setNamesEncoded(encode(Array.from(new Set(_names))));
+                }}
+              >
+                X
+              </button>
+            </li>
           ))}
         </ul>
       ) : null}
