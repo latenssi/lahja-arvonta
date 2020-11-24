@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import useQueryValue from "../lib/useQueryValue";
 import { decode, decrypt, getCode } from "../lib/util";
 
@@ -10,6 +11,10 @@ export default function Display() {
     title: "",
     seed: "",
   };
+
+  useEffect(() => {
+    if (title) document.title = `${title} | Arvonta`;
+  }, [title]);
 
   const pIdx = sample.findIndex((name) => getCode(name, seed) === code);
   const recipient = pIdx !== -1 ? sample[(pIdx + 1) % sample.length] : null;
