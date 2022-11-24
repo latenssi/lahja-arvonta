@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Permutation } from "js-combinatorics/commonjs/combinatorics";
+import { Permutation } from "js-combinatorics";
 
 import useQueryValue from "../lib/useQueryValue";
 import { encode, decode, encrypt, getCode, exportAsJSON } from "../lib/util";
